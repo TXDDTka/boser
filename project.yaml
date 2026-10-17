@@ -7,6 +7,42 @@ framework:
   version: 1.1.3
   last_upgraded: 2026-09-25
 
+project:
+  stage: Concept
+
+modes:
+  rigor: full
+  automation: guided
+
+engine:
+  name: "Unity"
+  version: "6000.2.7f2"
+  language: "C#"
+  rendering: "URP"
+  physics: "PhysX"
+  path: "C:/Program Files/Unity/Hub/Editor/6000.2.7f2/Editor/Unity.exe"
+
+specialists:
+  code: "unity-specialist"
+  shader: "unity-shader-specialist"
+  ui: "unity-ui-specialist"
+  additional: ["unity-dots-specialist", "unity-addressables-specialist"]
+
+naming:
+  classes: PascalCase
+  variables: camelCase
+  constants: SCREAMING_SNAKE   # UNVERIFIED — not sourceable from
+                               # docs/engine-reference/unity/; confirm before relying on it
+  signals: PascalCase On<Event>
+  files: PascalCase
+  scenes: PascalCase
+
+commands:
+  build: '"C:/Program Files/Unity/Hub/Editor/6000.2.7f2/Editor/Unity.exe" -batchmode -quit -projectPath . -buildTarget StandaloneWindows64 -buildWindows64Player Builds/Win64/Game.exe'
+  test: '"C:/Program Files/Unity/Hub/Editor/6000.2.7f2/Editor/Unity.exe" -batchmode -runTests -projectPath . -testPlatform EditMode -testResults test-results/editmode.xml'
+  run: 'Builds/Win64/Game.exe -screen-width 1280 -screen-height 720 -screen-fullscreen 0'
+  smoke: '"C:/Program Files/Unity/Hub/Editor/6000.2.7f2/Editor/Unity.exe" -batchmode -quit -projectPath . -logFile -'
+
 # NOTE: this template ships with no `modes:` block, and the six knobs below must
 # never be added to one.
 #

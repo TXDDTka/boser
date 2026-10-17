@@ -1,11 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "statusLine": {
-    "type": "command",
-    "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/statusline.sh\""
-  },
   "permissions": {
-    "defaultMode": "default",
     "allow": [
       "Bash(dir *)",
       "Bash(python -m pytest *)",
@@ -143,7 +138,8 @@
       "PowerShell(git *clean* -Xqdf*)",
       "PowerShell(Get-Content *.env*)",
       "PowerShell(*>.env*)"
-    ]
+    ],
+    "defaultMode": "default"
   },
   "hooks": {
     "SessionStart": [
@@ -269,5 +265,12 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/statusline.sh\""
+  },
+  "enabledPlugins": {
+    "everything-claude-code@everything-claude-code": true
   }
 }

@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Engine Version** | Unity 6.3 LTS |
-| **Installed at pin time** | NOT DETERMINED — `/setup-engine` §3 probes the installed editor and records the result here. |
+| **Installed at pin time** | 6000.2.7f2 (Unity 6.2) — this reference pins 6.3 LTS, so it sits **ahead of the installed editor** (deliberate, chosen 2026-10-17); APIs added in 6.3 may not compile locally until the editor is upgraded. |
 | **Release Date** | December 2025 |
 | **Project Pinned** | 2026-02-13 |
 | **Last Docs Verified** | 2026-02-13 |
