@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: ""
+last_updated: "2026-10-18"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -43,7 +43,17 @@ last_updated: ""
 # interface: how other systems access this state (read-only property, method call,
 #   signal, shared resource, etc.) — this is the contract other ADRs depend on.
 
-state_ownership: []
+state_ownership:
+  - state: champion_stat_values_and_effect_slots
+    status: active
+    owner_system: modifiers
+    adr: docs/architecture/adr-0007-modifier-stack-contract.md
+    interface: "IModifierReader.Get(StatIndex) -> float, GetSlot(SlotIndex) -> EffectIndex, Version (read-only, pull)"
+    write_access: "only via IModifierWriter source handles (Open/AddStat/SetSlot/Close); bulk ClearLifetime(Run) by run-structure only"
+    referenced_by:
+      - docs/architecture/adr-0007-modifier-stack-contract.md
+    added: 2026-10-18
+    revised: ""
 
 # Example:
 #
@@ -71,7 +81,30 @@ state_ownership: []
 #
 # pattern options: signal | direct_call | event_bus | shared_resource | rpc | none
 
-interfaces: []
+interfaces:
+  - contract: modifier_read
+    status: active
+    pattern: direct_call
+    producer: modifiers
+    consumers: [health, weapons, drops-and-pickups, hud]
+    adr: docs/architecture/adr-0007-modifier-stack-contract.md
+    signal_signature: "IModifierReader: float Get(StatIndex); EffectIndex GetSlot(SlotIndex); int Version { get; } — pull from cache, no events, 0 GC"
+    referenced_by:
+      - docs/architecture/adr-0007-modifier-stack-contract.md
+    added: 2026-10-18
+    revised: ""
+
+  - contract: modifier_write
+    status: active
+    pattern: direct_call
+    producer: [queen-upgrades, blessings, sidegrades, run-context, drops-and-pickups]
+    consumers: [modifiers]
+    adr: docs/architecture/adr-0007-modifier-stack-contract.md
+    signal_signature: "IModifierWriter: ModifierSourceHandle Open(ModifierLifetime {Permanent, Run}); AddStat(handle, StatIndex, StatOp, float, int priority); SetSlot(handle, SlotIndex, EffectIndex, int priority); Close(handle); ClearLifetime(Run) — run-structure only, at run end"
+    referenced_by:
+      - docs/architecture/adr-0007-modifier-stack-contract.md
+    added: 2026-10-18
+    revised: ""
 
 # Example:
 #
@@ -131,7 +164,17 @@ performance_budgets: []
 # Register an API decision when the choice is non-obvious and other ADRs might
 # make a different choice for the same purpose without knowing this was decided.
 
-api_decisions: []
+api_decisions:
+  - purpose: modifier_ids
+    status: active
+    api: "Stable string IDs in ModifierCatalog (ScriptableObject, immutable at runtime); dense int indices built per session by the composition root"
+    not: "C# enum IDs; index tables cached in ScriptableObject fields or static"
+    adr: docs/architecture/adr-0007-modifier-stack-contract.md
+    reason: "Saves and the censored build see only string IDs; per-session tables survive Enter Play Mode without Domain Reload"
+    referenced_by:
+      - docs/architecture/adr-0007-modifier-stack-contract.md
+    added: 2026-10-18
+    revised: ""
 
 # Example:
 #
@@ -157,7 +200,34 @@ api_decisions: []
 # Register a pattern when an ADR explicitly bans it AND other ADRs might
 # unknowingly use it (i.e., it's a tempting but wrong approach for this project).
 
-forbidden_patterns: []
+forbidden_patterns:
+  - pattern: modifier_stack_source_awareness
+    status: active
+    description: "The modifier stack must not contain types, enums or branches naming a source (blessing, queen, prison, sidegrade, drop)."
+    why: "Prevents the God Object flagged in systems-index; a new source must not require editing the stack."
+    adr: docs/architecture/adr-0007-modifier-stack-contract.md
+    added: 2026-10-18
+
+  - pattern: modifier_stack_static_access
+    status: active
+    description: "No singleton or static access to the modifier stack; readers/writers are injected by the composition root. No mutable static state in Game.Modifiers."
+    why: "Testability via DI; static state survives Enter Play Mode without Domain Reload."
+    adr: docs/architecture/adr-0007-modifier-stack-contract.md
+    added: 2026-10-18
+
+  - pattern: modifier_stack_serialization
+    status: active
+    description: "The modifier stack is never saved; Permanent-source owners rebuild their handles after load; Run sources are not restored."
+    why: "Stack is derived state; keeps saves ID-only and full/censored builds compatible."
+    adr: docs/architecture/adr-0007-modifier-stack-contract.md
+    added: 2026-10-18
+
+  - pattern: run_modifier_opened_outside_run
+    status: active
+    description: "Run-lifetime modifier handles (sidegrade, Priscilla weapon choice) must be opened only at run start, never in prison or camp."
+    why: "ClearLifetime(Run) at run end would otherwise erase choices made for the next run."
+    adr: docs/architecture/adr-0007-modifier-stack-contract.md
+    added: 2026-10-18
 
 # Example:
 #
